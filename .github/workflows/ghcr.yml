@@ -1,0 +1,59 @@
+
+name: GHCR - Install SD-Core 5G
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  install:
+    runs-on: ubuntu-latest  # Using our own self hosted runner
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+
+
+      - name: Install Prerequisites
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y git curl make net-tools pipx python3-venv sshpass netplan.io iptables jq sed
+          pipx install --include-deps ansible || true  # Ignore if already installed
+          pipx ensurepath
+          make --version  # Verify make installation
+          echo "PATH=\$PATH:/usr/bin:/home/rishi/.local/bin" >> $GITHUB_ENV
+          source $GITHUB_ENV  # Ensure new PATH is applied
+
+      - name: Debug PATH and Installed Tools
+        run: |
+          echo "Current PATH: $PATH"
+          which sed || echo "sed not found"
+          ls -l /usr/bin/sed || echo "/usr/bin/sed not found"
+
+
+
+    # Step 5: Create Kubernetes secret for GHCR
+      - name: Create GHCR Secret
+        run: |
+          kubectl create namespace omec --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret docker-registry ghcr-secret \
+           --namespace=my-namespace \
+           --docker-server=ghcr.io \
+           --docker-username=${{ secrets.GHCR_USERNAME }} \
+           --docker-password=${{ secrets.GHCR_PAT }} \
+           --dry-run=client -o yaml | kubectl apply -f -
+          
+      - name: Install Kubernetes
+        shell: bash 
+        run: |
+          make aether-k8s-install  # Running from repo home
+        
+      - name: Install SD-Core
+        run: |
+          make aether-5gc-install  # Running from repo home
+          kubectl get pods -n omec
+
+      - name: Install Management Application
+        run: |
+          make aether-amp-install  # Running from repo home
