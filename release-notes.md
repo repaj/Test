@@ -10,7 +10,7 @@
  - [ ] 09. Component level Release version Mapping is final and documented ?
  - [ ] 10. Component level Release deliverable are complete ?
  - [ ] 11. Binary assets are archived with release ?
- - [ ] 12. Git Tagging of Source Code ?
+ - [ ] 12. Git Tagging of Source Code is completed ?
  - [ ] 13. Bug raised on RC version is closed ?
  - [ ] 14. Whether the Sub module Linking at the release repo is complete ?
- - [ ] 15. All New+ Modified features, Bug Fixes are added to the relesae ?
+ - [ ] 15. All New + Modified features, Bug Fixes are added to the relesae ?
